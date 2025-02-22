@@ -1,13 +1,26 @@
 
-const {app, server}= require('../../connections/server')
+const express = require("express");
+require("dotenv").config();
+const http = require("http");
+const cors = require("cors");
 const mongoose=  require('../../connections/db')
-const express=require('express')
 const authRoutes = require("../../routes/auth"); 
 const authMiddleware=require("../../middlewares/authMiddleware")
 const groupcreate=require("../../routes/groupcreate")
 const addfriend= require('../../routes/addfriend')
-const cors = require("cors");
+
 const serverless = require('serverless-http');
+const port = process.env.PORT
+
+const app = express();
+app.use(express.json());
+app.use(cors({ origin: "*" }));
+const server = http.createServer(app);
+
+
+
+
+
 app.use(cors({ origin: "*", methods: ["GET", "POST"] }));
 const socketio=require('../../Socket/socketio')
 app.use(express.json());

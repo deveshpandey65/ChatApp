@@ -5,7 +5,7 @@ const User = require("../models/user");
 const oneoneConversation = require("../models/oneoneconversational");
 const groupConversation = require("../models/groupconversational");
 
-module.exports = (io) => {
+// module.exports = (io) => {
     router.post("/send-message", async (req, res) => {
         try {
             const { senderId, receiverId, groupId, message } = req.body;
@@ -36,8 +36,8 @@ module.exports = (io) => {
                 }
 
 
-                io.to(`dm-${senderId}-${receiverId}`).emit("new-message", newMessage);
-                io.to(`dm-${receiverId}-${senderId}`).emit("new-message", newMessage);
+                // io.to(`dm-${senderId}-${receiverId}`).emit("new-message", newMessage);
+                // io.to(`dm-${receiverId}-${senderId}`).emit("new-message", newMessage);
             } else {
                 let groupconversational = await groupConversation.findById(groupId);
 
@@ -48,7 +48,7 @@ module.exports = (io) => {
                 groupconversational.messages.push(newMessage._id);
                 groupconversational.markModified("messages");
                 await groupconversational.save();
-                io.to(`group-${groupId}`).emit("new-message", newMessage);
+                // io.to(`group-${groupId}`).emit("new-message", newMessage);
 
             }
 
@@ -90,5 +90,5 @@ module.exports = (io) => {
         }
     });
 
-    return router;
-};
+    module.exports= router;
+// };

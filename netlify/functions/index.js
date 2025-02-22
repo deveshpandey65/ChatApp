@@ -15,57 +15,57 @@ const port = process.env.PORT
 const app = express();
 app.use(express.json());
 app.use(cors({ origin: "*" }));
-const server = http.createServer(app);
+// const server = http.createServer(app);
 
 
 
 
 
 app.use(cors({ origin: "*", methods: ["GET", "POST"] }));
-const socketio=require('../../Socket/socketio')
+// const socketio=require('../../Socket/socketio')
 app.use(express.json());
 
-app.use(cors({ origin: "*", methods: ["GET", "POST"] }));
-const io = require("socket.io")(server, {
-    cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-    }
-});
+// app.use(cors({ origin: "*", methods: ["GET", "POST"] }));
+// const io = require("socket.io")(server, {
+//     cors: {
+//         origin: "*",
+//         methods: ["GET", "POST"]
+//     }
+// });
 
-const message = require("../../routes/message")(io);
+const message = require("../../routes/message");
 app.use("/api/auth", authRoutes);
 app.use("/api/friend", authMiddleware, addfriend)
 app.use("/api/message",authMiddleware,message)
 app.use("/api/message/create-group",authMiddleware,groupcreate)
 
-const users = {};
+// const users = {};
 
-io.on('connection', (socket) => {
-    console.log('User connected:', socket.id);
+// io.on('connection', (socket) => {
+//     console.log('User connected:', socket.id);
 
-    socket.on("joinRoom", ({ userId }) => {
-            users[userId] = socket.id;
-            socket.join(`dm-${userId}`);
-            console.log(`${userId} joined with socket ID: ${socket.id}`);
-    });
+//     socket.on("joinRoom", ({ userId }) => {
+//             users[userId] = socket.id;
+//             socket.join(`dm-${userId}`);
+//             console.log(`${userId} joined with socket ID: ${socket.id}`);
+//     });
 
-    socket.on("sendMessage", (data) => {
-        console.log("Message received:", data);
-        console.log("Users Map:", users);
+//     socket.on("sendMessage", (data) => {
+//         console.log("Message received:", data);
+//         console.log("Users Map:", users);
 
-        if (data.receiverId) {
-            const receiverSocketId = users[data.receiverId];
-            console.log(`Receiver ID: ${data.receiverId}, Receiver Socket ID: ${receiverSocketId}`);
+//         if (data.receiverId) {
+//             const receiverSocketId = users[data.receiverId];
+//             console.log(`Receiver ID: ${data.receiverId}, Receiver Socket ID: ${receiverSocketId}`);
 
-            if (receiverSocketId) {
-                io.to(receiverSocketId).emit("receiveMessage", data);
-                console.log("Message sent to:", receiverSocketId, "Message:", data.message);
-            } else {
-                console.log("Receiver not connected");
-            }
-        }
-    });
+//             if (receiverSocketId) {
+//                 io.to(receiverSocketId).emit("receiveMessage", data);
+//                 console.log("Message sent to:", receiverSocketId, "Message:", data.message);
+//             } else {
+//                 console.log("Receiver not connected");
+//             }
+//         }
+//     });
 
 
     // socket.on("disconnect", () => {
@@ -78,7 +78,7 @@ io.on('connection', (socket) => {
     //     console.log("User disconnected:", socket.id);
     // });
 
-});
+// });
 
 
 

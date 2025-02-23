@@ -1,0 +1,42 @@
+functionsDirectory = "C:\\Users\\dpdev\\OneDrive\\Desktop\\chatapp - Copy - Copy\\backend\\netlify\\functions"
+functionsDirectoryOrigin = "config-v1"
+redirectsOrigin = "config"
+plugins = []
+headers = []
+
+[build]
+publish = "C:\\Users\\dpdev\\OneDrive\\Desktop\\chatapp - Copy - Copy\\backend"
+publishOrigin = "default"
+commandOrigin = "config"
+command = "npm install"
+functions = "C:\\Users\\dpdev\\OneDrive\\Desktop\\chatapp - Copy - Copy\\backend\\netlify\\functions"
+
+[build.environment]
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
+
+[functions]
+
+[functions."*"]
+
+[[redirects]]
+from = "/*"
+to = "/.netlify/functions/api"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]

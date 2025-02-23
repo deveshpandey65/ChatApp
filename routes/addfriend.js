@@ -75,19 +75,19 @@ router.post('/get-friend', async (req, res) => {
         res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 });
-router.post('/users',async(req,res)=>{
+router.get('/users',async(req,res)=>{
     try {
         const searchQuery = req.query.search;
+        console.log(searchQuery)
         if (!searchQuery) {
             return res.status(400).json({ message: "Search query is required" });
         }
-
         const users = await User.find({
             $or: [
                 { name: { $regex: searchQuery, $options: "i" } },
                 { email: { $regex: searchQuery, $options: "i" } },
             ],
-        });
+        }).select("name _id email friends profilepic");
 
         res.json(users);
     } catch (error) {

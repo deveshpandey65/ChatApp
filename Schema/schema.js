@@ -15,7 +15,8 @@ const UserSchema = mongoose.Schema(
             required: true
         },
         profilepic: {
-            type: String
+            type: String ,
+            default: 'https://static-00.iconduck.com/assets.00/profile-default-icon-512x511-v4sw4m29.png'
         },
         friends:{
             type: [{type: mongoose.Schema.Types.ObjectId,ref: 'User'}],

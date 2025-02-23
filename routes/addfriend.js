@@ -53,7 +53,7 @@ router.post('/get-friend', async (req, res) => {
         }
 
         const friends = await User.find({ _id: { $in: user.friends } }).select("_id name lastSeen profilepic");
-
+        console.log(friends)
         const formattedFriends = friends.map(friend => ({
             _id: friend._id,
             name: friend.name,
@@ -68,7 +68,7 @@ router.post('/get-friend', async (req, res) => {
             name: group.groupId,  
             participantes: group.participantes,
             type: "group",
-            img: friend.profilepic  
+            img: group.profilepic  
         }));
 
         res.status(200).json({ friends: [...formattedFriends, ...formattedGroups] });

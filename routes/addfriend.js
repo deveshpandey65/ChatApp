@@ -52,21 +52,23 @@ router.post('/get-friend', async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        const friends = await User.find({ _id: { $in: user.friends } }).select("_id name lastseen profilepic");
+        const friends = await User.find({ _id: { $in: user.friends } }).select("_id name lastSeen profilepic");
 
         const formattedFriends = friends.map(friend => ({
             _id: friend._id,
             name: friend.name,
             lastSeen: moment(friend.lastSeen).fromNow(),
-            type:"friend"
+            type:"friend",
+            img:friend.profilepic
         }));
-        const groups = await groupConversation.find({ _id: { $in: user.groups } }).select("_id groupId participantes");
+        const groups = await groupConversation.find({ _id: { $in: user.groups } }).select("_id groupId participantes profilepic");
 
         const formattedGroups = groups.map(group => ({
             _id: group._id,
             name: group.groupId,  
             participantes: group.participantes,
-            type: "group"  
+            type: "group",
+            img: friend.profilepic  
         }));
 
         res.status(200).json({ friends: [...formattedFriends, ...formattedGroups] });

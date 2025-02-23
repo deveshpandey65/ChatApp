@@ -88,7 +88,17 @@ const groupconversationalSchema = mongoose.Schema(
         messages: {
             type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Messages' }],
             default: []
+        },
+        profilepic:{
+            type:String,
+            default:'https://cdn.pixabay.com/photo/2020/05/29/13/26/icons-5235125_1280.png'
+
+        },
+        timestamp:{
+            type:Date,
+            default:Date.now
         }
+
     }
 )
 module.exports = {

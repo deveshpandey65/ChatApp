@@ -52,7 +52,7 @@ router.post('/get-friend', async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        const friends = await User.find({ _id: { $in: user.friends } }).select("_id name lastSeen");
+        const friends = await User.find({ _id: { $in: user.friends } }).select("_id name lastSeen profilepic");
 
         const formattedFriends = friends.map(friend => ({
             _id: friend._id,

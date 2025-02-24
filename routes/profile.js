@@ -4,6 +4,12 @@ const User = require("../models/user");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
+const app = express();
+app.use(cors({ origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+ }));
+
+
 
 const uploadDir = path.join(__dirname, "../uploads/profilePic");
 

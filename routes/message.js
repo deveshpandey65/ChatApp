@@ -4,6 +4,10 @@ const Message = require("../models/message");
 const User = require("../models/user");
 const oneoneConversation = require("../models/oneoneconversational");
 const groupConversation = require("../models/groupconversational");
+const app = express();
+app.use(cors({ origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+ }));
 
 // module.exports = (io) => {
     router.post("/send-message", async (req, res) => {

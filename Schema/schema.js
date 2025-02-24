@@ -20,12 +20,15 @@ const UserSchema = mongoose.Schema(
         },
         friends:{
             type: [{type: mongoose.Schema.Types.ObjectId,ref: 'User'}],
+            default: []
         },
         groups:{
             type: [{type: mongoose.Schema.Types.ObjectId,ref: 'Group'}],
+            default: []
         },
         about: {
-            type: String
+            type: String,
+            default: ''
         },
         online: {
             type: Boolean,
@@ -51,7 +54,10 @@ const MessageSchema = mongoose.Schema(
             },
         message: {
             type: String,
-            required: true
+        },
+        file:{
+            type: String
+
         },
         read: {
             type: Boolean,

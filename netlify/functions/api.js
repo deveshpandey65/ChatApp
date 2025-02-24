@@ -20,6 +20,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/friend", authMiddleware, addFriend);
 app.use("/api/message", authMiddleware, require("../../routes/message"));
 app.use("/api/message/create-group", authMiddleware, groupCreate);
+app.use("/api/profile", require("../../routes/profile"));
 
 if (!mongoose) {
     console.error("MONGOOSE NOT CONNECTED");

@@ -5,10 +5,6 @@ const User = require("../models/user");
 const router = express.Router();
 require('dotenv').config
 
-const app = express();
-app.use(cors({ origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
- }));
 
 
 router.post("/verify", async (req, res) => {

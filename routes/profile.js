@@ -1,25 +1,26 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
-const multer = require("multer");
-const fs = require("fs");
-const path = require("path");
-const app = express();
-app.use(cors({ origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
- }));
+const { v2: cloudinary } = require("cloudinary");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+require("dotenv").config();
 
+// ✅ Cloudinary Configuration
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
+// ✅ Multer Storage (Uploads to Cloudinary)
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: "profilePics", // Folder in Cloudinary
+        allowed_formats: ["jpg", "jpeg", "png"], // Allowed file types
+    },
+});
 
-const uploadDir = path.join(__dirname, "../uploads/profilePic");
-
-// Ensure the upload directory exists
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Multer Storage (Saves file buffer in memory)
-const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 /**
@@ -27,7 +28,7 @@ const upload = multer({ storage: storage });
  */
 router.post("/profile-img", upload.single("profile"), async (req, res) => {
     try {
-        if (!req.file) {
+        if (!req.file || !req.file.path) {
             return res.status(400).json({ message: "No file uploaded" });
         }
 
@@ -36,27 +37,21 @@ router.post("/profile-img", upload.single("profile"), async (req, res) => {
             return res.status(400).json({ message: "User ID is required" });
         }
 
-        // Generate Unique File Name
-        const uniqueFilename = `profile-${userId}-${Date.now()}${path.extname(req.file.originalname)}`;
-        const filePath = path.join(uploadDir, uniqueFilename);
+        // ✅ Cloudinary Image URL
+        const fileUrl = req.file.path;
 
-        // Save file to disk
-        fs.writeFileSync(filePath, req.file.buffer);
-
-        // Find User & Update Profile Picture
+        // ✅ Update User Profile Pic
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // Construct Profile Pic URL
-        const baseUrl = `${req.protocol}://${req.get("host")}`;
-        user.profilepic = `${baseUrl}/uploads/profilePic/${uniqueFilename}`;
+        user.profilepic = fileUrl;
         await user.save();
 
         res.status(200).json({
             message: "Image uploaded successfully",
-            filePath: user.profilepic,
+            filePath: fileUrl,
         });
     } catch (error) {
         console.error("Upload Error:", error);
@@ -70,7 +65,6 @@ router.post("/profile-img", upload.single("profile"), async (req, res) => {
 router.get("/get-profile", async (req, res) => {
     try {
         const { userId } = req.query;
-        console.log("Requested UserID:", userId);
 
         if (!userId) {
             return res.status(400).json({ message: "User ID is required" });
@@ -81,13 +75,7 @@ router.get("/get-profile", async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // Ensure Profile Pic URL is Correct
-        if (user.profilepic && !user.profilepic.startsWith("http")) {
-            const baseUrl = `${req.protocol}://${req.get("host")}`;
-            user.profilepic = `${baseUrl}${user.profilepic}`;
-        }
-
-        return res.status(200).json(user);
+        res.status(200).json(user);
     } catch (error) {
         console.error("Error fetching profile:", error);
         return res.status(500).json({ message: "Internal Server Error" });

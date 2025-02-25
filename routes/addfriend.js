@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
-
+const getRedisClient = require('../client/client');
 const moment = require("moment");
 const groupConversation = require("../models/groupconversational");
+const Message = require("../models/message");
 
 
 router.post("/add-friend", async (req, res) => {
@@ -39,10 +40,20 @@ router.post("/add-friend", async (req, res) => {
         res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 });
+
+
 router.post('/get-friend', async (req, res) => {
+    // const client = await getRedisClient();
     try {
         const { userId } = req.body;
+        const cacheKey = userId;
 
+        // 🔹 Check Redis cache
+        // const cachedData = await client.get(cacheKey);
+        // if (cachedData) {
+        //     return res.status(200).json({ friends: JSON.parse(cachedData) });
+        // }
+        console.log("hiii")
         if (!userId) {
             return res.status(400).json({ message: "User ID is required" });
         }
@@ -51,32 +62,83 @@ router.post('/get-friend', async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
+        
+        // 🔹 Fetch all friends
+        const friends = await User.find({ _id: { $in: user.friends } }).select("_id name lastseen profilepic about email createdAt");
 
-        const friends = await User.find({ _id: { $in: user.friends } }).select("_id name lastSeen profilepic");
-        console.log(friends)
-        const formattedFriends = friends.map(friend => ({
-            _id: friend._id,
-            name: friend.name,
-            lastSeen: moment(friend.lastSeen).fromNow(),
-            type:"friend",
-            img:friend.profilepic
-        }));
-        const groups = await groupConversation.find({ _id: { $in: user.groups } }).select("_id groupId participantes profilepic");
+        // 🔹 Fetch all groups
+        const groups = await groupConversation.find({ _id: { $in: user.groups } }).select("_id groupId participantes profilepic createdAt");
 
-        const formattedGroups = groups.map(group => ({
-            _id: group._id,
-            name: group.groupId,  
-            participantes: group.participantes,
-            type: "group",
-            img: group.profilepic  
-        }));
+        // 🔹 Find last message timestamps
+        const lastMessages = await Promise.all(
+            [...friends, ...groups].map(async (entity) => {
+                let lastMessage = null;
+                let createdAt = entity.createdAt || 0;
 
-        res.status(200).json({ friends: [...formattedFriends, ...formattedGroups] });
+                if (entity.participantes) {
+                    // It's a group chat
+                    lastMessage = await Message.findOne({ groupId: entity._id })
+                        .sort({ timestamp: -1 })
+                        .select("timestamp message");
+
+                    return {
+                        _id: entity._id,
+                        name: entity.groupId,  // ✅ Set `groupId` as `name`
+                        lastMessage:lastMessage?lastMessage:'',
+                        lastMessageTime: lastMessage ? lastMessage.timestamp : createdAt, // Sort fallback
+                        lastSeen: entity.lastseen ? entity.lastseen :'',
+                        createdAt: createdAt,
+                        type: "group",
+                        img: entity.profilepic
+                    };
+                } else {
+                    // It's a one-on-one chat
+                    lastMessage = await Message.findOne({
+                        $or: [
+                            { senderId: userId, receiverId: entity._id },
+                            { senderId: entity._id, receiverId: userId }
+                        ]
+                    }).sort({ timestamp: -1 }).select("timestamp message");
+
+                    return {
+                        _id: entity._id,
+                        name: entity.name,
+                        lastMessageTime: lastMessage ? lastMessage.timestamp : createdAt,
+                        lastSeen: entity.lastseen ? moment(entity.lastseen).fromNow() : '',
+                        lastMessage:lastMessage?lastMessage:'',
+                        createdAt: createdAt,
+                        about:entity.about?entity.about:'',
+                        type: "friend",
+                        email:entity.email,
+                        img: entity.profilepic
+                    };
+                }
+            })
+        );
+
+        lastMessages.sort((a, b) => {
+            if (b.lastMessageTime !== a.lastMessageTime) {
+                return b.lastMessageTime - a.lastMessageTime; 
+            }
+            return b.createdAt - a.createdAt; 
+        });
+
+        // 🔹 Cache the result
+        // await client.set(cacheKey, JSON.stringify(lastMessages), 'EX', 600);
+        user.lastseen = Date.now();
+        user.save()
+
+        return res.status(200).json({ friends: lastMessages });
+
     } catch (error) {
         console.error("Error getting friends:", error.message);
-        res.status(500).json({ message: "Internal Server Error", error: error.message });
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 });
+
+
+
+
 router.get('/users',async(req,res)=>{
     try {
         const searchQuery = req.query.search;

@@ -35,40 +35,52 @@ const UserSchema = mongoose.Schema(
             default: false
         },
         lastseen: {
-            type: Date,
-            default: Date.now
+            type: Date
         },
-
     }
+     ,{ timestamps: true }
 )
 const MessageSchema = mongoose.Schema(
     {
-        senderId:{
+        senderId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-            required: true
+            ref: "User",
+            required: true,
         },
-        receiverId:{
+        receiverId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-            },
+            ref: "User",
+            required: false,  
+        },
+        groupId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Group",
+            required: false, 
+        },
         message: {
             type: String,
+            trim: true,
         },
-        file:{
-            type: String
-
-        },
+        files: [
+            {
+                url: { type: String, required: true },
+                type: { type: String, required: true },
+            },
+        ],
         read: {
             type: Boolean,
-            default: false
+            default: false,
         },
         timestamp: {
             type: Date,
-            default: Date.now
+            default: Date.now,
+        },
+        seenAt:{
+            type:Date,
         }
-    }
-)
+    },
+    { timestamps: true } 
+);
 const oneoneconversationalSchema=mongoose.Schema(
     {
         participantes:{
@@ -79,7 +91,7 @@ const oneoneconversationalSchema=mongoose.Schema(
             type:[{type:mongoose.Schema.Types.ObjectId,ref:'Messages'}],
             default:[]
         }
-    }
+    }, { timestamps: true }
 )
 const groupconversationalSchema = mongoose.Schema(
     {
@@ -100,12 +112,8 @@ const groupconversationalSchema = mongoose.Schema(
             default:'https://cdn.pixabay.com/photo/2020/05/29/13/26/icons-5235125_1280.png'
 
         },
-        timestamp:{
-            type:Date,
-            default:Date.now
-        }
 
-    }
+    }, { timestamps: true }
 )
 module.exports = {
     UserSchema: UserSchema,

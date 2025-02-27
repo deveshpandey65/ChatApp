@@ -4,10 +4,10 @@ const Message = require("../models/message");
 const User = require("../models/user");
 const oneoneConversation = require("../models/oneoneconversational");
 const groupConversation = require("../models/groupconversational");
-const getRedisClient = require('../client/client');
+// const getRedisClient = require('../client/client');
 
 router.post("/", async (req, res) => {
-    const client = await getRedisClient();
+    // const client = await getRedisClient();
     try {
         const { groupId, participantes } = req.body;
 
@@ -26,7 +26,7 @@ router.post("/", async (req, res) => {
                 { $addToSet: { groups: newGroupConversation._id } },
                 { new: true }
             );
-            await client.del(participantId.toString());
+            // await client.del(participantId.toString());
         }));
 
         res.status(200).json({ message: "Group created successfully", newGroupConversation });
